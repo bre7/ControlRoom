@@ -24,6 +24,9 @@ jobs:
     #- name: Homebrew build helpers install
     #  run: brew bundle
 
+    - name: Select Xcode 12
+      run: sudo xcode-select -switch /Applications/Xcode_12_beta.app
+
     - name: Show the currently detailed version of Xcode for CLI
       run: xcode-select -p
 
@@ -40,4 +43,4 @@ jobs:
     #  run: swift format lint --configuration .swift-format-config -r .
 
     - name: build and test
-      run: xcodebuild clean test -scheme '${{ matrix.run-config['scheme'] }}' -destination '${{ matrix.run-config['destination'] }}' -showBuildTimingSummary
+      run: xcodebuild clean build -scheme '${{ matrix.run-config['scheme'] }}' -destination '${{ matrix.run-config['destination'] }}' -showBuildTimingSummary
