@@ -15,8 +15,8 @@ jobs:
 
     steps:
 
-    - name: Cancel redundant jobs
-      uses: technote-space/auto-cancel-redundant-job@v1
+    #- name: Cancel redundant jobs
+    #  uses: technote-space/auto-cancel-redundant-job@v1
 
     - name: Checkout Project
       uses: actions/checkout@v2
