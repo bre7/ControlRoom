@@ -66,14 +66,9 @@ jobs:
     #- name: lint
     #  run: swift format lint --configuration .swift-format-config -r .
 
-    - name: build and test
+    - name: "⚒️ Build"
       run: xcodebuild clean build -scheme '${{ matrix.run-config['scheme'] }}' -destination '${{ matrix.run-config['destination'] }}' -showBuildTimingSummary
 
-    # TODO: Use actions/cache@v2 to save build result
-    - name: Save build
-      run: echo "Not yet implemented ! 🚨🚨🚨"
-
-    # TODO: Codesign
     - name: Codesign - Import Certs
       uses: Apple-Actions/import-codesign-certs@v1
       with:
@@ -87,6 +82,10 @@ jobs:
         issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
         api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
         api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+
+    # TODO: Use actions/cache@v2 to store build result ?
+    - name: Cache build
+      run: echo "Not yet implemented ! 🚨🚨🚨"
 
   release:
     needs: build_sign
@@ -117,8 +116,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./my-artifact.zip
-          asset_name: my-artifact.zip
+          asset_path: ./com.hackingwithswift.ControlRoom.ipa
+          asset_name: ControlRoom-macOS.ipa
           asset_content_type: application/zip
 
   homebrew:
