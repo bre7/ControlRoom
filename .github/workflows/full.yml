@@ -72,7 +72,7 @@ jobs:
           -scheme '${{ matrix.run-config['scheme'] }}' \
           -destination '${{ matrix.run-config['destination'] }}' \
           -derivedDataPath DerivedData \
-          -archivePath DerivedData/Archive/ControlRoom archive
+          -archivePath DerivedData/Archive/ControlRoom archive \
           -showBuildTimingSummary
 
     - name: Codesign - Import Certs
