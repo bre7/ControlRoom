@@ -1,0 +1,102 @@
+# source https://rhonabwy.com/2020/05/09/continuous-integration-with-github-actions-for-macos-and-ios-projects/
+
+name: Release macOS app
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+
+  build:
+    name: Swift Build
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        run-config:
+          - { scheme: 'Release - ControlRoom', destination: 'platform=macOS' }
+
+    steps:
+
+    - name: Cancel redundant jobs
+      uses: technote-space/auto-cancel-redundant-job@v1
+
+    - name: Checkout Project
+      uses: actions/checkout@v2
+
+    #- name: Homebrew build helpers install
+    #  run: brew bundle
+
+    - name: Select Xcode 12
+      run: sudo xcode-select -switch /Applications/Xcode_12_beta.app
+
+    - name: Show the currently detailed version of Xcode for CLI
+      run: xcode-select -p
+
+    - name: Show Build Settings
+      run: xcodebuild -project ControlRoom.xcodeproj -scheme '${{ matrix.run-config['scheme'] }}' -showBuildSettings
+
+    - name: Show Build SDK
+      run: xcodebuild -project ControlRoom.xcodeproj -scheme '${{ matrix.run-config['scheme'] }}' -showsdks
+
+    - name: Show Available Destinations
+      run: xcodebuild -project ControlRoom.xcodeproj -scheme '${{ matrix.run-config['scheme'] }}' -showdestinations
+
+    #- name: lint
+    #  run: swift format lint --configuration .swift-format-config -r .
+
+    - name: build and test
+      run: xcodebuild clean build -scheme '${{ matrix.run-config['scheme'] }}' -destination '${{ matrix.run-config['destination'] }}' -showBuildTimingSummary
+
+    # TODO: Use actions/cache@v2 to save build result
+    - name: Save build
+      run: echo "Not yet implemented ! 🚨🚨🚨"
+
+    # TODO: Codesign
+    - name: Codesign
+      run: echo "Not yet implemented ! 🚨🚨🚨"
+
+  release:
+    needs: build
+    name: Create Release & Upload Assets
+    runs-on: ubuntu-latest
+
+    steps:
+      # TODO: Use actions/cache@v2 to get build result
+      - name: Fetch build
+        run: echo "Not yet implemented ! 🚨🚨🚨"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./my-artifact.zip
+          asset_name: my-artifact.zip
+          asset_content_type: application/zip
+
+  homebrew:
+    needs: build
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # TODO: homebrew
+      - name: Homebrew
+        run: echo "Not yet implemented ! 🚨🚨🚨"
