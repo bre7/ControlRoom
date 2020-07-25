@@ -1,4 +1,23 @@
-# source https://rhonabwy.com/2020/05/09/continuous-integration-with-github-actions-for-macos-and-ios-projects/
+# sources
+# https://rhonabwy.com/2020/05/09/continuous-integration-with-github-actions-for-macos-and-ios-projects/
+# https://github.com/Apple-Actions/Example-iOS/blob/master/.github/workflows/test.yml
+# https://medium.com/@karaiskc/archive-and-export-ios-app-with-github-actions-b44f676e4bf9
+# https://leenarts.net/2020/02/12/github-actions-for-ios-projects/
+# https://github.com/actions/upload-release-asset
+# https://medium.com/@Extrawurst/github-actions-homebrew-%EF%B8%8F-2789ae5023fd
+
+
+#########################################
+# 🚨 CONFIGURE SECRETS ON YOUR REPO 🚨 #
+#########################################
+# guide https://github.com/Apple-Actions
+# goto https://github.com/twostraws/ControlRoom/settings/secrets
+#
+# CERTIFICATES_FILE_BASE64
+# CERTIFICATES_PASSWORD
+# APPSTORE_ISSUER_ID
+# APPSTORE_KEY_ID
+# APPSTORE_PRIVATE_KEY
 
 name: Release macOS app
 
@@ -10,7 +29,7 @@ on:
 
 jobs:
 
-  build:
+  build_sign:
     name: Swift Build
     runs-on: macos-latest
     strategy:
@@ -29,8 +48,8 @@ jobs:
     #- name: Homebrew build helpers install
     #  run: brew bundle
 
-    - name: Select Xcode 12
-      run: sudo xcode-select -switch /Applications/Xcode_12_beta.app
+    #- name: Select Xcode 12
+    #  run: sudo xcode-select -switch /Applications/Xcode_12_beta.app
 
     - name: Show the currently detailed version of Xcode for CLI
       run: xcode-select -p
@@ -55,15 +74,27 @@ jobs:
       run: echo "Not yet implemented ! 🚨🚨🚨"
 
     # TODO: Codesign
-    - name: Codesign
-      run: echo "Not yet implemented ! 🚨🚨🚨"
+    - name: Codesign - Import Certs
+      uses: Apple-Actions/import-codesign-certs@v1
+      with:
+        p12-file-base64: ${{ secrets.CERTIFICATES_FILE_BASE64 }}
+        p12-password: ${{ secrets.CERTIFICATES_PASSWORD }}
+
+    - name: Codesign - Download Provisioning Profiles
+      uses: Apple-Actions/download-provisioning-profiles@v1
+      with:
+        bundle-id: com.hackingwithswift.ControlRoom
+        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+        api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+        api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
 
   release:
-    needs: build
+    needs: build_sign
     name: Create Release & Upload Assets
     runs-on: ubuntu-latest
 
     steps:
+
       # TODO: Use actions/cache@v2 to get build result
       - name: Fetch build
         run: echo "Not yet implemented ! 🚨🚨🚨"
@@ -91,7 +122,7 @@ jobs:
           asset_content_type: application/zip
 
   homebrew:
-    needs: build
+    needs: build_sign
     name: Create Release
     runs-on: ubuntu-latest
 
